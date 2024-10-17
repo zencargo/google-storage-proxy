@@ -16,3 +16,7 @@
 # IntelliJ
 .idea/
 *.iml
+
+#Kubernetes
+deployment.yaml
+service.yaml

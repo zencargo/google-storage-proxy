@@ -1,11 +1,12 @@
 package main
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"flag"
-	"github.com/cirruslabs/google-storage-proxy/proxy"
 	"log"
+
+	"cloud.google.com/go/storage"
+	http_cache "github.com/zencargo/google-storage-proxy/proxy"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	}
 
 	bucketHandler := client.Bucket(bucketName)
-	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix)
+	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix, bucketName)
 
 	err = storageProxy.Serve(address, port)
 	if err != nil {
