@@ -1,9 +1,9 @@
-FROM golang:latest as builder
+FROM golang:latest AS builder
 
 WORKDIR /build
 ADD . /build
 
-RUN CGO_ENABLED=0 go build -o google-storage-proxy ./cmd/
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o google-storage-proxy ./cmd/
 
 FROM alpine:latest
 LABEL org.opencontainers.image.source=https://github.com/zencargo/google-storage-proxy/
