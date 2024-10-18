@@ -10,13 +10,13 @@ As the project is not really maintained we decided to make changes to the code i
 
 - Check the docker hub repository to make sure you don't build with a tag name that already exits.
 
-- `docker build -t zencargo/google-storage-proxy:tagname .`
+- `docker build -t abcd/google-storage-proxy:tagname .`
 
 - Test deploying image locally in docker-desktop.
 
 - If you're happy with the changes you can push to dockerhub.
 
-- `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname --push .`
+- `docker buildx build --platform linux/amd64 -t abcd/google-storage-proxy:tagname --push .`
 
 ---
 [![Build Status](https://api.cirrus-ci.com/github/cirruslabs/google-storage-proxy.svg)](https://cirrus-ci.com/github/cirruslabs/google-storage-proxy)
