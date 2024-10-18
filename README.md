@@ -4,15 +4,17 @@ This repo is a fork from https://github.com/cirruslabs/google-storage-proxy.
 
 As the project is not really maintained we decided to make changes to the code in our fork and push them to our dockerHub.
 
-- To update create a branch with updated changes.
+- First, create a branch with updated changes.
 
 - run `docker login` in your terminal
 
-- Check the docker hub repository to make sure you don't overwrite existing tags.
+- Check the docker hub repository to make sure you don't build with a tag name that already exits.
 
 - `docker build -t zencargo/google-storage-proxy:tagname .`
 
 - Test deploying image locally in docker-desktop.
+
+- If you're happy with the changes you can push to dockerhub.
 
 - `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname --push .`
 
