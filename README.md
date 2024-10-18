@@ -1,3 +1,22 @@
+## How to update image and push to dockerHub
+
+This repo is a fork from https://github.com/cirruslabs/google-storage-proxy.
+
+As the project is not really maintained we decided to make changes to the code in our fork and push them to our dockerHub.
+
+- To update create a branch with updated changes.
+
+- run `docker login` in your terminal
+
+- Check the docker hub repository to make sure you don't overwrite existing tags.
+
+- `docker build -t zencargo/google-storage-proxy:tagname .`
+
+- Test deploying image locally in docker-desktop.
+
+- `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname --push .`
+
+---
 [![Build Status](https://api.cirrus-ci.com/github/cirruslabs/google-storage-proxy.svg)](https://cirrus-ci.com/github/cirruslabs/google-storage-proxy)
 
 HTTP proxy with REST API to interact with Google Cloud Storage Buckets
