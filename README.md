@@ -28,7 +28,7 @@ blobs to a specified GCS bucket.
 Prebuilt Docker image is available on Docker Hub:
 
 ```bash
-docker pull zencargo/google-storage-proxy:v2
+docker pull zencargo/google-storage-proxy:v3
 ```
 
 # Arguments
