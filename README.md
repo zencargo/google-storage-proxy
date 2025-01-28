@@ -1,23 +1,28 @@
-## How to update image and push to dockerHub
+## How to update image and push to Google Artifact Repository
 
-This repo is a fork from https://github.com/cirruslabs/google-storage-proxy.
+This repo is a fork from https://github.com/cirruslabs/google-storage-proxy
 
-The project is not really maintained so we decided to make changes to the code in our fork and push them to our dockerHub.
+The original repo is not really maintained so we decided to make changes to the code in our fork and push them to our image repository.
 
 - First, create a branch with updated changes.
 
 - run `docker login` in your terminal
 
 - Check the docker hub repository to make sure you don't build/push with a tag name that already exits.
-- https://hub.docker.com/repository/docker/zencargo/google-storage-proxy/general
+- https://console.cloud.google.com/artifacts/docker/prj-zen-c-artifact-reg-5bhv/europe-west4/google-storage-proxy/google-storage-proxy?inv=1&invt=Abn-Ig&walkthrough_id=iam--quickstart&project=prj-zen-c-artifact-reg-5bhv
 
 - `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname .`
 
-- Test deploying image locally in docker-desktop.
+- Test deploying image locally using docker-desktop.
 
-- If you're happy with the changes you can push to dockerhub.
+- If you're happy with the changes you can push to Artifact Registry.
 
-- `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname --push .`
+```console
+$ docker tag zencargo/google-storage-proxy:tagname \
+   europe-west4-docker.pkg.dev/prj-zen-c-artifact-reg-5bhv/google-storage-proxy/google-storage-proxy:tagname
+
+$ docker push europe-west4-docker.pkg.dev/prj-zen-c-artifact-reg-5bhv/google-storage-proxy/google-storage-proxy:tagname
+```
 
 ---
 HTTP proxy with REST API to interact with Google Cloud Storage Buckets
@@ -25,10 +30,10 @@ HTTP proxy with REST API to interact with Google Cloud Storage Buckets
 Simply allows using `HEAD`, `GET` or `PUT` requests to check blob's availability, as well as downloading or uploading
 blobs to a specified GCS bucket.
 
-Prebuilt Docker image is available on Docker Hub:
+Prebuilt Docker image is available in Artifact Repository:
 
 ```bash
-docker pull zencargo/google-storage-proxy:v3
+docker pull europe-west4-docker.pkg.dev/prj-zen-c-artifact-reg-5bhv/google-storage-proxy/google-storage-proxy:v3
 ```
 
 # Arguments
