@@ -1,4 +1,4 @@
-## How to update image and push to Google Artifact Repository
+## How to build and push google-storage-proxy image to Google Artifact Repository
 
 This repo is a fork from https://github.com/cirruslabs/google-storage-proxy
 
