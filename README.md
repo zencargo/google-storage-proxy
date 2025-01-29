@@ -8,7 +8,7 @@ The original repo is not really maintained so we decided to make changes to the 
 
 - run `docker login` in your terminal
 
-- Check the docker hub repository to make sure you don't build/push with a tag name that already exits.
+- Check the Artifact repository to make sure you don't build/push with a tag name that already exits.
 - https://console.cloud.google.com/artifacts/docker/prj-zen-c-artifact-reg-5bhv/europe-west4/google-storage-proxy/google-storage-proxy?inv=1&invt=Abn-Ig&walkthrough_id=iam--quickstart&project=prj-zen-c-artifact-reg-5bhv
 
 - `docker buildx build --platform linux/amd64 -t zencargo/google-storage-proxy:tagname .`
