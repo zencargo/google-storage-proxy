@@ -17,21 +17,21 @@ func main() {
 	var bucketName string
 	flag.StringVar(&bucketName, "bucket", "", "Google Storage Bucket Name")
 	var defaultPrefix string
-	flag.StringVar(&defaultPrefix, "prefix", "", "Optional prefix for all objects. For example, use --prefix=foo/ to work under foo directory in a bucket.")
+	flag.StringVar(&defaultPrefix, "prefix", "", "Optional general GCS object prefix (e.g. version directory).")
+	var stripRuntimePathPrefix string
+	flag.StringVar(&stripRuntimePathPrefix, "strip-runtime-path-prefix", "", "Runtime path prefix to strip from incoming requests (e.g., '/microservices/').")
 	flag.Parse()
 
 	if bucketName == "" {
 		log.Fatal("Please specify Google Cloud Storage Bucket")
 	}
-
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to create a storage client: %s", err)
 	}
-
 	bucketHandler := client.Bucket(bucketName)
-	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix, bucketName)
-
+	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix, bucketName, stripRuntimePathPrefix)                        // Pass new flag
+	log.Printf("gcs-proxy starting with stripRuntimePathPrefix: %q, defaultGCSObjectPrefix: %q", stripRuntimePathPrefix, defaultPrefix) // Added log
 	err = storageProxy.Serve(address, port)
 	if err != nil {
 		log.Fatalf("Failed to start proxy: %s", err)
