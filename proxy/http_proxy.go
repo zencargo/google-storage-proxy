@@ -34,7 +34,6 @@ func (proxy StorageProxy) objectName(nameAfterStripping string) string {
 	if strings.HasPrefix(nameAfterStripping, proxy.bucketName+"/") {
 		return strings.TrimPrefix(nameAfterStripping, proxy.bucketName+"/")
 	}
-
 	return proxy.defaultGCSObjectPrefix + nameAfterStripping
 }
 
@@ -44,6 +43,7 @@ func (proxy StorageProxy) Serve(address string, port int64) error {
 
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
+		log.Printf("gcs-proxy: failed to listen on %s: %v", listenAddr, err)
 		return fmt.Errorf("gcs-proxy: failed to listen on %s: %w", listenAddr, err)
 	}
 
@@ -61,13 +61,10 @@ func (proxy StorageProxy) Serve(address string, port int64) error {
 
 func (proxy StorageProxy) handler(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Path
-	log.Printf("gcs-proxy: Received request for raw path: %s", key)
 
 	if proxy.stripRuntimePathPrefix != "" {
-
 		if strings.HasPrefix(key, proxy.stripRuntimePathPrefix) {
 			key = strings.TrimPrefix(key, proxy.stripRuntimePathPrefix)
-			log.Printf("gcs-proxy: Path after stripping prefix %q: %s", proxy.stripRuntimePathPrefix, key)
 		} else {
 			log.Printf("gcs-proxy: Warning - request path %q did not have expected strip-prefix %q. Will attempt to serve as is relative to root.", r.URL.Path, proxy.stripRuntimePathPrefix)
 		}
@@ -75,7 +72,6 @@ func (proxy StorageProxy) handler(w http.ResponseWriter, r *http.Request) {
 
 	if key == "" {
 		key = "index.html"
-		log.Printf("gcs-proxy: Path became empty after stripping, defaulting to %s", key)
 	}
 
 	if len(key) > 0 && key[0] == '/' {
@@ -84,10 +80,7 @@ func (proxy StorageProxy) handler(w http.ResponseWriter, r *http.Request) {
 
 	if key == "" {
 		key = "index.html"
-		log.Printf("gcs-proxy: Path is empty after all processing, defaulting to %s", key)
 	}
-
-	log.Printf("gcs-proxy: Final key for GCS lookup (after potential stripping): %s", key)
 
 	ext := filepath.Ext(key)
 	contentType := mime.TypeByExtension(ext)
@@ -110,12 +103,11 @@ func (proxy StorageProxy) handler(w http.ResponseWriter, r *http.Request) {
 
 func (proxy StorageProxy) downloadBlob(w http.ResponseWriter, name string) {
 	objectNameInBucket := proxy.objectName(name)
-	log.Printf("Attempting to download GCS object: %q (from processed key: %q)", objectNameInBucket, name)
 
 	object := proxy.bucketHandler.Object(objectNameInBucket)
 	reader, err := object.NewReader(context.Background())
 	if err != nil {
-		log.Printf("Error creating reader for GCS object %q (it may not exist or there are permission issues): %v", objectNameInBucket, err)
+		log.Printf("Error creating reader for GCS object %q (it may not exist or there are permission issues): %v", objectNameInBucket, err) // Keep error log
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -132,7 +124,6 @@ func (proxy StorageProxy) downloadBlob(w http.ResponseWriter, name string) {
 
 func (proxy StorageProxy) checkBlobExists(w http.ResponseWriter, name string) {
 	objectNameInBucket := proxy.objectName(name)
-	log.Printf("Checking if GCS object exists: %q (from processed key: %q)", objectNameInBucket, name)
 
 	object := proxy.bucketHandler.Object(objectNameInBucket)
 	attrs, err := object.Attrs(context.Background())
@@ -146,13 +137,11 @@ func (proxy StorageProxy) checkBlobExists(w http.ResponseWriter, name string) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	log.Printf("GCS object exists: %q", objectNameInBucket)
 	w.WriteHeader(http.StatusOK)
 }
 
 func (proxy StorageProxy) uploadBlob(w http.ResponseWriter, r *http.Request, name string) {
 	objectNameInBucket := proxy.objectName(name)
-	log.Printf("Attempting to upload GCS object: %q (from processed key: %q)", objectNameInBucket, name)
 	object := proxy.bucketHandler.Object(objectNameInBucket)
 	writer := object.NewWriter(context.Background())
 
@@ -161,18 +150,16 @@ func (proxy StorageProxy) uploadBlob(w http.ResponseWriter, r *http.Request, nam
 		if err := writer.Close(); err != nil {
 			log.Printf("Failed to close GCS object writer for %q: %v", objectNameInBucket, err)
 			if writeSuccessful {
-
-				http.Error(w, fmt.Sprintf("Failed to finalize upload for %q: %v", objectNameInBucket, err), http.StatusInternalServerError)
 			}
 		} else if writeSuccessful {
-			log.Printf("Successfully closed GCS object writer for %q, upload finalized.", objectNameInBucket)
+			log.Printf("Successfully uploaded and finalized GCS object: %q", objectNameInBucket)
 		}
 	}()
 
 	bufferedReader := bufio.NewReader(r.Body)
 	bufferedWriter := bufio.NewWriter(writer)
 
-	bytesWritten, err := bufferedWriter.ReadFrom(bufferedReader)
+	_, err := bufferedWriter.ReadFrom(bufferedReader)
 	if err != nil {
 		log.Printf("Failed during ReadFrom (request body to GCS writer) for blob %q: %v", objectNameInBucket, err)
 		uploadBlobFailedResponse(w, err)
@@ -186,11 +173,10 @@ func (proxy StorageProxy) uploadBlob(w http.ResponseWriter, r *http.Request, nam
 	}
 
 	writeSuccessful = true
-	log.Printf("Successfully wrote %d bytes to GCS buffer for blob %q. Finalizing object upon writer close.", bytesWritten, objectNameInBucket)
 	w.WriteHeader(http.StatusCreated)
 }
 
 func uploadBlobFailedResponse(w http.ResponseWriter, err error) {
-	log.Printf("Upload failed: %v", err)
+	log.Printf("Upload failed for object: %v", err)
 	http.Error(w, fmt.Sprintf("Blob upload failed: %v", err), http.StatusBadRequest)
 }
