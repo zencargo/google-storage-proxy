@@ -30,8 +30,7 @@ func main() {
 		log.Fatalf("Failed to create a storage client: %s", err)
 	}
 	bucketHandler := client.Bucket(bucketName)
-	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix, bucketName, stripRuntimePathPrefix)                        // Pass new flag
-	log.Printf("gcs-proxy starting with stripRuntimePathPrefix: %q, defaultGCSObjectPrefix: %q", stripRuntimePathPrefix, defaultPrefix) // Added log
+	storageProxy := http_cache.NewStorageProxy(bucketHandler, defaultPrefix, bucketName, stripRuntimePathPrefix)
 	err = storageProxy.Serve(address, port)
 	if err != nil {
 		log.Fatalf("Failed to start proxy: %s", err)
