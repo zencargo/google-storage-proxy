@@ -18,15 +18,15 @@ type StorageProxy struct {
 	bucketHandler          *storage.BucketHandle
 	defaultGCSObjectPrefix string
 	bucketName             string
-	stripPathPrefix        string
+	stripRuntimePathPrefix string
 }
 
-func NewStorageProxy(bucketHandler *storage.BucketHandle, defaultGCSObjectPrefix string, bucketName string, stripPathPrefix string) *StorageProxy {
+func NewStorageProxy(bucketHandler *storage.BucketHandle, defaultGCSObjectPrefix string, bucketName string, stripRuntimePathPrefix string) *StorageProxy {
 	return &StorageProxy{
 		bucketHandler:          bucketHandler,
 		defaultGCSObjectPrefix: defaultGCSObjectPrefix,
 		bucketName:             bucketName,
-		stripPathPrefix:        stripPathPrefix,
+		stripRuntimePathPrefix: stripRuntimePathPrefix,
 	}
 }
 
@@ -62,11 +62,11 @@ func (proxy StorageProxy) Serve(address string, port int64) error {
 func (proxy StorageProxy) handler(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Path
 
-	if proxy.stripPathPrefix != "" {
-		if strings.HasPrefix(key, proxy.stripPathPrefix) {
-			key = strings.TrimPrefix(key, proxy.stripPathPrefix)
+	if proxy.stripRuntimePathPrefix != "" {
+		if strings.HasPrefix(key, proxy.stripRuntimePathPrefix) {
+			key = strings.TrimPrefix(key, proxy.stripRuntimePathPrefix)
 		} else {
-			log.Printf("gcs-proxy: Warning - request path %q did not have expected strip-prefix %q. Will attempt to serve as is relative to root.", r.URL.Path, proxy.stripPathPrefix)
+			log.Printf("gcs-proxy: Warning - request path %q did not have expected strip-prefix %q. Will attempt to serve as is relative to root.", r.URL.Path, proxy.stripRuntimePathPrefix)
 		}
 	}
 
